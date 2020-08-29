@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/onepaas/onepaas/internal/app/onepaas/cmd/migration"
-	"github.com/onepaas/onepaas/pkg/config"
+	"github.com/onepaas/onepaas/internal/pkg/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
