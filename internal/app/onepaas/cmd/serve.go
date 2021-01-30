@@ -15,6 +15,7 @@ func NewServeCommand() *cobra.Command {
 		Long:  "Run OnePaaS API Server",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			db.InitDB()
+			db.InitRedis()
 
 			return nil
 		},

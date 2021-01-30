@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  postgresql:
+    image: postgres:13.1-alpine
+    container_name: onepaas-pg
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_DB: onepaas
+      POSTGRES_USER: onepaas
+      POSTGRES_PASSWORD: onepaas
+  dex:
+    image: dexidp/dex:v2.27.0
+    container_name: onepaas-dex
+    command: serve /dex.yaml
+    ports:
+    - 127.0.0.1:5556:5556
+    depends_on:
+      - postgresql
+    volumes:
+      - ./dex.yaml.dist:/dex.yaml
