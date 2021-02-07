@@ -6,3 +6,8 @@ database:
   password: onepaas
   host: localhost
   port: 5432
+
+oidc:
+  client_id: "onepaas"
+  client_secret: "onepaas-secret"
+  issuer: http://127.0.0.1:5556/dex

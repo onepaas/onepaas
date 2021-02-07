@@ -55,24 +55,6 @@ func (as *ApiServer) setupRoutes() {
 		store := cookie.NewStore([]byte("secret"))
 		sessionMiddleware := sessions.Sessions("ONEPAAS", store)
 
-		// Initialize a provider by specifying dex's issuer URL.
-		provider, err := oidc.NewProvider(context.Background(), "http://127.0.0.1:5556/dex")
-		if err != nil {
-			fmt.Print(err.Error())
-			os.Exit(411)
-		}
-
-		Oauth2Config := oauth2.Config{
-			ClientID: "onepaas",
-			ClientSecret: "onepaas-secret",
-			RedirectURL: "http://127.0.0.1:8080/v1/oauth/callback",
-			// Discovery returns the OAuth2 endpoints.
-			Endpoint: provider.Endpoint(),
-
-			// "openid" is a required scope for OpenID Connect flows.
-			Scopes: []string{oidc.ScopeOpenID, "profile", "email", "groups"},
-		}
-
 		oauth := controller.NewOAuthController(provider, Oauth2Config)
 		v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
 		v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)

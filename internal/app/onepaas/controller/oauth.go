@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"context"
 	"github.com/coreos/go-oidc"
+	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"golang.org/x/oauth2"
 	"net/http"
 
@@ -11,14 +13,12 @@ import (
 )
 
 type OAuthController struct{
-	OidcProvider *oidc.Provider
-	Oauth2Config oauth2.Config
+	Authenticator *auth.Authenticator
 }
 
-func NewOAuthController(OidcProvider *oidc.Provider, Oauth2Config oauth2.Config) OAuthController {
+func NewOAuthController(authenticator *auth.Authenticator) OAuthController {
 	return OAuthController {
-		OidcProvider: OidcProvider,
-		Oauth2Config: Oauth2Config,
+		Authenticator: authenticator,
 	}
 }
 
@@ -30,11 +30,19 @@ func (o *OAuthController) Authorize(c *gin.Context) {
 		return
 	}
 
+	claims := Claims{}
+	claims.Subject = "state"
+	signedToken, err := context.Auth.SessionStorer.SignedToken(&claims)
+	if err != nil {
+		http.Error(context.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	session := sessions.Default(c)
 	session.Set("state", state.String())
 	session.Save()
 
-	c.Redirect(http.StatusTemporaryRedirect, o.Oauth2Config.AuthCodeURL(state.String()))
+	c.Redirect(http.StatusTemporaryRedirect, o.Authenticator.Config.AuthCodeURL(state.String()))
 }
 
 func (o *OAuthController) Callback(c *gin.Context) {
