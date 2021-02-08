@@ -2,6 +2,9 @@ package controller
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"github.com/coreos/go-oidc"
 	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"golang.org/x/oauth2"
@@ -23,26 +26,21 @@ func NewOAuthController(authenticator *auth.Authenticator) OAuthController {
 }
 
 func (o *OAuthController) Authorize(c *gin.Context) {
-	state, err := uuid.NewRandom()
+	// Generate random state
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
-
 		return
 	}
 
-	claims := Claims{}
-	claims.Subject = "state"
-	signedToken, err := context.Auth.SessionStorer.SignedToken(&claims)
-	if err != nil {
-		http.Error(context.Writer, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	state := base64.StdEncoding.EncodeToString(b)
 
 	session := sessions.Default(c)
-	session.Set("state", state.String())
+	session.Set("state", state)
 	session.Save()
 
-	c.Redirect(http.StatusTemporaryRedirect, o.Authenticator.Config.AuthCodeURL(state.String()))
+	c.Redirect(http.StatusTemporaryRedirect, o.Authenticator.Config.AuthCodeURL(state))
 }
 
 func (o *OAuthController) Callback(c *gin.Context) {
@@ -56,9 +54,16 @@ func (o *OAuthController) Callback(c *gin.Context) {
 	}
 
 	code := c.Query("code")
-	oauth2Token, err := o.Oauth2Config.Exchange(c, code)
+	oauth2Token, err := o.Authenticator.Config.Exchange(c, code)
 	if err != nil {
 		// handle error
+	}
+	if err != nil {
+		c.A
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+		err = fmt.Errorf("failed to get token: %s", err.Error())
+		return nil, err
 	}
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
