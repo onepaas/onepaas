@@ -4,25 +4,27 @@ import (
 	"context"
 	"github.com/coreos/go-oidc"
 	"github.com/onepaas/onepaas/pkg/viper"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
-	"log"
 )
 
 type Authenticator struct {
 	Provider *oidc.Provider
+	Verifier *oidc.IDTokenVerifier
 	Config   oauth2.Config
 	Ctx      context.Context
 }
 
-func NewAuthenticator() (*Authenticator, error) {
+func NewAuthenticator() *Authenticator {
 	ctx := context.Background()
 
 	// Initialize a provider by specifying OIDC's issuer URL.
 	provider, err := oidc.NewProvider(ctx, viper.GetString("oidc.issuer"))
 	if err != nil {
-		log.Printf("failed to get provider: %v", err)
-		return nil, err
+		log.Fatal().Err(err).Msg("Failed to get provider")
 	}
+
+	verifier := provider.Verifier(&oidc.Config{ClientID: viper.GetString("oidc.client_id")})
 
 	conf := oauth2.Config{
 		ClientID:     viper.GetString("oidc.client_id"),
@@ -36,7 +38,8 @@ func NewAuthenticator() (*Authenticator, error) {
 
 	return &Authenticator{
 		Provider: provider,
+		Verifier: verifier,
 		Config:   conf,
 		Ctx:      ctx,
-	}, nil
+	}
 }

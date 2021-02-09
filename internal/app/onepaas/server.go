@@ -2,9 +2,7 @@ package onepaas
 
 import (
 	"context"
-	"fmt"
-	"github.com/coreos/go-oidc"
-	"golang.org/x/oauth2"
+	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"net/http"
 	"os"
 	"os/signal"
@@ -55,7 +53,7 @@ func (as *ApiServer) setupRoutes() {
 		store := cookie.NewStore([]byte("secret"))
 		sessionMiddleware := sessions.Sessions("ONEPAAS", store)
 
-		oauth := controller.NewOAuthController(provider, Oauth2Config)
+		oauth := controller.NewOAuthController(auth.NewAuthenticator())
 		v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
 		v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
 	}

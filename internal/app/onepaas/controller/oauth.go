@@ -1,18 +1,14 @@
 package controller
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
-	"github.com/coreos/go-oidc"
 	"github.com/onepaas/onepaas/internal/pkg/auth"
-	"golang.org/x/oauth2"
+	"github.com/rs/zerolog/log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type OAuthController struct{
@@ -30,7 +26,9 @@ func (o *OAuthController) Authorize(c *gin.Context) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		log.Error().Err(err)
+
 		return
 	}
 
@@ -56,42 +54,47 @@ func (o *OAuthController) Callback(c *gin.Context) {
 	code := c.Query("code")
 	oauth2Token, err := o.Authenticator.Config.Exchange(c, code)
 	if err != nil {
-		// handle error
-	}
-	if err != nil {
-		c.A
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusUnprocessableEntity)
+		log.Error().Err(err).Msg("Failed to get token.")
+
 		return
-		err = fmt.Errorf("failed to get token: %s", err.Error())
-		return nil, err
 	}
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		// handle missing token
+		c.AbortWithStatus(http.StatusUnprocessableEntity)
+		log.Error().Msg("No \"id_token\" in token response")
+
+		return
 	}
 
-	// Create an ID token parser.
-	idTokenVerifier := o.OidcProvider.Verifier(&oidc.Config{ClientID: "onepaas"})
-
 	// Parse and verify ID Token payload.
-	idToken, err := idTokenVerifier.Verify(c, rawIDToken)
+	idToken, err := o.Authenticator.Verifier.Verify(c, rawIDToken)
 	if err != nil {
-		// handle error
+		c.AbortWithStatus(http.StatusUnprocessableEntity)
+		log.Error().Err(err).Msg("Failed to verify ID token")
+
+		return
 	}
 
 	// Extract custom claims.
-	var claims struct {
-		Name	string `json:"name"`
-		Email    string   `json:"email"`
-		Verified bool     `json:"email_verified"`
-		Groups   []string `json:"groups"`
+	var IDTokenClaims struct {
+		Subject           string            `json:"sub"`
+		Name              string            `json:"name"`
+		PreferredUsername string            `json:"preferred_username"`
+		Email             string            `json:"email"`
+		Verified          bool              `json:"email_verified"`
+		Groups            []string          `json:"groups"`
+		FederatedClaims   map[string]string `json:"federated_claims"`
 	}
-	if err := idToken.Claims(&claims); err != nil {
-		// handle error
+	if err := idToken.Claims(&IDTokenClaims); err != nil {
+		c.AbortWithStatus(http.StatusUnprocessableEntity)
+		log.Error().Err(err).Msg("Failed to parse claims")
+
+		return
 	}
 
-	c.JSON(http.StatusOK, claims)
+	c.JSON(http.StatusOK, IDTokenClaims)
 
 //	user, err := oauthProvider.FetchUser(token.AccessToken)
 //	if err != nil {

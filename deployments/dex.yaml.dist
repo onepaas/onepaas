@@ -93,7 +93,7 @@ oauth2:
 #
 #   # By default, Dex will ask for approval to share data with application
 #   # (approval for sharing data from connected IdP to Dex is separate process on IdP)
-  skipApprovalScreen: false
+  skipApprovalScreen: true
 #
 #   # If only one authentication method is enabled, the default behavior is to
 #   # go directly to it. For connected IdPs, this redirects the browser away

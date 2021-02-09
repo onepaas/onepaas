@@ -9,6 +9,11 @@ services:
       POSTGRES_DB: onepaas
       POSTGRES_USER: onepaas
       POSTGRES_PASSWORD: onepaas
+  redis:
+    image: redis:6.0-alpine
+    container_name: onepaas-redis
+    ports:
+      - 6379:6379
   dex:
     image: dexidp/dex:v2.27.0
     container_name: onepaas-dex
