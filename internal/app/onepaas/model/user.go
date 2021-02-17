@@ -9,13 +9,13 @@ import (
 )
 
 type User struct {
-	Id         string    `pg:"type:varchar(26)"`
-	Username   string    `pg:"type:varchar(255)"`
-	Email      string    `pg:"type:varchar(255)"`
-	Name       string    `pg:"type:varchar(255)"`
-	Meta       struct{}  `pg:"type:jsonb"`
-	CreatedAt  time.Time `pg:"type:timestamptz"`
-	ModifiedAt time.Time `pg:"type:timestamptz"`
+	Id         string    `json:"id" pg:"type:varchar(26)"`
+	Email      string    `json:"email" pg:"type:varchar(255)"`
+	Password   string	 `json:"-" pg:"type:text"`
+	Name       string    `json:"name" pg:"type:varchar(255)"`
+	Meta       struct{}  `json:"-" pg:"type:jsonb"`
+	CreatedAt  time.Time `json:"created_at" pg:"type:timestamptz"`
+	ModifiedAt time.Time `json:"modified_at" pg:"type:timestamptz"`
 }
 
 var _ pg.BeforeInsertHook = (*User)(nil)

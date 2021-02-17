@@ -32,4 +32,9 @@ func InitConfig(configFile string) {
 	}
 
 	viper.SetDefault("debug", true)
+	viper.SetDefault("redis.host", "127.0.0.1")
+	viper.SetDefault("redis.port", 6379)
+	viper.SetDefault("redis.db", 0)
+	viper.SetDefault("redis.username", "")
+	viper.SetDefault("redis.password", "")
 }

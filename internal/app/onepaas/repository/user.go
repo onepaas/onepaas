@@ -18,10 +18,16 @@ func NewUserRepository(db *pg.DB) *userRepository {
 
 func (r *userRepository) Create(cReq types.CreateUserRequest) (pg.Result, error) {
 	user := model.User{
-		Username: cReq.Username,
 		Email: cReq.Email,
 		Name: cReq.Name,
 	}
 
 	return r.Model(&user).Insert()
+}
+
+func (r *userRepository) FindByEmail(email string) (*model.User, error) {
+	user := new(model.User)
+	err := r.Model(user).Where("email = ?", email).Select()
+
+	return user, err
 }
