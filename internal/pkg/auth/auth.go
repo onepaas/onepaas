@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/coreos/go-oidc"
 	"github.com/onepaas/onepaas/pkg/viper"
 	"github.com/rs/zerolog/log"
@@ -33,7 +34,7 @@ func NewAuthenticator() *Authenticator {
 		// Discovery returns the OAuth2 endpoints.
 		Endpoint:     provider.Endpoint(),
 		// "openid" is a required scope for OpenID Connect flows.
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email", "groups"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email", "groups", "federated:id", oidc.ScopeOfflineAccess},
 	}
 
 	return &Authenticator{

@@ -1,0 +1,59 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/atkrad/OnePaaS/1.0.0
+info:
+  description: |
+    The OnePaaS API is an HTTP API served by OnePaaS. It is the API the
+    OnePaaS Ctl (CLI client) uses to communicate with the OnePaaS, so everything the OnePaaS
+    Ctl can do can be done with the API.
+  version: "1.0.0"
+  title: OnePaaS API
+  contact:
+    email: m.abdolirad@gmail.com
+  license:
+    name: MIT License
+    url: 'https://github.com/onepaas/onepaas/blob/master/LICENSE'
+paths:
+  /users:
+    post:
+      summary: adds an user
+      operationId: addInventory
+      description: Adds an item to the system
+      responses:
+        '201':
+          description: User created
+        '400':
+          description: 'Invalid input, object invalid'
+        '409':
+          description: User already exists
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Add user
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+        - confirm_password
+      properties:
+        name:
+          type: string
+          example: Foo Bar
+        email:
+          type: string
+          example: me@example.com
+        password:
+          type: string
+          format: string
+        confirm_password:
+          type: string
+          format: string

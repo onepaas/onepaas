@@ -1,34 +1,32 @@
 package validator
 
 import (
-	"fmt"
+	"database/sql"
 	"strings"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/onepaas/onepaas/internal/pkg/db"
+	"github.com/onepaas/onepaas/internal/pkg/database"
 	"github.com/rs/zerolog/log"
 )
 
 var uniquenessValidator validator.Func = func(fl validator.FieldLevel) bool {
-	fieldValue, ok := fl.Field().Interface().(string)
-	if ok {
-		// table name: paramas[0], column name: params[1]
-		params := strings.Split(fl.Param(), ";")
+	fieldValue := fl.Field().String()
 
-		query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = ? LIMIT 1", params[1], params[0], params[1])
-		res, err := db.GetDB().Exec(query, fieldValue)
-		if err != nil {
-			log.Error().Err(err)
-			return false
+	// table name: paramas[0], column name: params[1]
+	params := strings.Split(fl.Param(), ";")
+
+	row := database.GetDB().Table(params[0]).Where(params[1] + " = ?", fieldValue).Select(params[1]).Row()
+	err := row.Scan()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true
 		}
 
-		if res.RowsReturned() == 1 {
-			return false
-		}
+		log.Error().Err(err)
 	}
 
-	return true
+	return false
 }
 
 func init() {

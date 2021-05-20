@@ -1,33 +1,36 @@
 package repository
 
 import (
-	"github.com/go-pg/pg/v10"
 	"github.com/onepaas/onepaas/internal/app/onepaas/model"
 	"github.com/onepaas/onepaas/internal/app/onepaas/types"
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
-	*pg.DB
+	*gorm.DB
 }
 
-func NewUserRepository(db *pg.DB) *userRepository {
+func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{
 		DB: db,
 	}
 }
 
-func (r *userRepository) Create(cReq types.CreateUserRequest) (pg.Result, error) {
+func (r *userRepository) Create(cReq types.CreateUserRequest) (int64, error) {
 	user := model.User{
 		Email: cReq.Email,
-		Name: cReq.Name,
+		Name:  cReq.Name,
 	}
 
-	return r.Model(&user).Insert()
+	result := r.DB.Create(&user)
+
+	return result.RowsAffected, result.Error
 }
 
 func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 	user := new(model.User)
-	err := r.Model(user).Where("email = ?", email).Select()
 
-	return user, err
+	result := r.Where("email = ?", email).Take(&user)
+
+	return user, result.Error
 }

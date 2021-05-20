@@ -1,9 +1,6 @@
 package migration
 
 import (
-	"github.com/go-pg/migrations/v8"
-	_ "github.com/onepaas/onepaas/internal/app/onepaas/migrations"
-	"github.com/onepaas/onepaas/internal/pkg/db"
 	"github.com/spf13/cobra"
 )
 
@@ -19,14 +16,10 @@ func NewMigrationCommand(parent *cobra.Command) *cobra.Command {
 				return err
 			}
 
-			db.InitDB()
-			migrations.SetTableName("migrations")
-
 			return nil
 		},
 	}
 
-	migrationCmd.AddCommand(NewInitCommand())
 	migrationCmd.AddCommand(NewUpCommand())
 	migrationCmd.AddCommand(NewDownCommand())
 	migrationCmd.AddCommand(NewVersionCommand())

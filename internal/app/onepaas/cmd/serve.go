@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/onepaas/onepaas/internal/app/onepaas"
-	"github.com/onepaas/onepaas/internal/pkg/db"
+	"github.com/onepaas/onepaas/internal/pkg/database"
 	"github.com/onepaas/onepaas/pkg/viper"
 	"github.com/spf13/cobra"
 )
@@ -14,8 +14,8 @@ func NewServeCommand() *cobra.Command {
 		Short: "Run OnePaaS",
 		Long:  "Run OnePaaS API Server",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			db.InitDB()
-			db.InitRedis()
+			database.InitDB()
+			database.InitRedis()
 
 			return nil
 		},

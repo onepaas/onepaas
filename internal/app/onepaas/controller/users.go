@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
 	"github.com/onepaas/onepaas/internal/app/onepaas/types"
-	"github.com/onepaas/onepaas/internal/pkg/db"
+	"github.com/onepaas/onepaas/internal/pkg/database"
 )
 
 type UsersController struct{}
@@ -18,11 +18,11 @@ func (u *UsersController) Add(c *gin.Context) {
 		return
 	}
 
-	r := repository.NewUserRepository(db.GetDB())
+	r := repository.NewUserRepository(database.GetDB())
 	if _, err := r.Create(input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+	c.JSON(http.StatusCreated, gin.H{"status": "you are logged in"})
 }

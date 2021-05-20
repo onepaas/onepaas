@@ -1,6 +1,7 @@
 address: ":8080"
 
 database:
+  driver: postgres
   name: onepaas
   username: onepaas
   password: onepaas

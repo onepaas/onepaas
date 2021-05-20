@@ -1,8 +1,9 @@
 package migration
 
 import (
-	"github.com/go-pg/migrations/v8"
-	"github.com/onepaas/onepaas/internal/pkg/db"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/onepaas/onepaas/internal/pkg/database"
+	"github.com/onepaas/onepaas/internal/pkg/migration"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -11,24 +12,39 @@ import (
 func NewDownCommand() *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "down",
-		Short: "Reverts last migration",
-		RunE:   runDown,
+		Short: "Applying all down migrations",
+		Long:  "Down looks at the currently active migration version and will migrate all the way down.",
+		RunE:  runDown,
 	}
 
 	return initCmd
 }
 
-func runDown(_ *cobra.Command, args []string) (err error) {
-	oldVersion, newVersion, err := migrations.Run(db.GetDB(), "down")
+func runDown(_ *cobra.Command, args []string) error {
+	downConfirmed := false
+	prompt := &survey.Confirm{
+		Message: "Are you sure you want to apply all down migrations?",
+	}
+
+	survey.AskOne(prompt, &downConfirmed)
+
+	m, err := migration.NewMigrate(database.InitDB())
 	if err != nil {
-		return
+		return err
 	}
 
-	if newVersion != oldVersion {
-		log.Info().Msgf("Migrated from version %d to %d", oldVersion, newVersion)
-	} else {
-		log.Info().Msg("The last version has already reverted")
+	if downConfirmed {
+		err = m.Down()
+		if err != nil {
+			return err
+		}
+
+		log.Info().Msg("The down migrations have migrated.")
+
+		return nil
 	}
 
-	return
+	log.Info().Msg("The down migrations haven't migrated.")
+
+	return nil
 }

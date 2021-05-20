@@ -3,20 +3,21 @@ package controller
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"net/http"
+
 	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"github.com/rs/zerolog/log"
-	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-type OAuthController struct{
+type OAuthController struct {
 	Authenticator *auth.Authenticator
 }
 
 func NewOAuthController(authenticator *auth.Authenticator) OAuthController {
-	return OAuthController {
+	return OAuthController{
 		Authenticator: authenticator,
 	}
 }
@@ -46,6 +47,7 @@ func (o *OAuthController) Callback(c *gin.Context) {
 
 	state := c.Query("state")
 	if session.Get("state") != state {
+		log.Error().Msg("Mismatch state.")
 		c.AbortWithStatus(http.StatusUnprocessableEntity)
 
 		return
@@ -96,27 +98,27 @@ func (o *OAuthController) Callback(c *gin.Context) {
 
 	c.JSON(http.StatusOK, IDTokenClaims)
 
-//	user, err := oauthProvider.FetchUser(token.AccessToken)
-//	if err != nil {
-//		c.AbortWithError(http.StatusInternalServerError, err)
-//
-//		return
-//	}
-//
-//	userRepo := repository.NewUserRepository(db.GetDB())
-//	u, err := userRepo.FindByEmail(user.Email)
-//	if err == pg.ErrNoRows {
-//		userRepo.Create(types.CreateUserRequest{
-//			Email: user.Email,
-//			Name: user.Name,
-//		})
-//	}
-//
-//	if err != nil {
-//		c.AbortWithError(http.StatusInternalServerError, err)
-//
-//		return
-//	}
-//
-//	c.JSON(200, u)
+	//	user, err := oauthProvider.FetchUser(token.AccessToken)
+	//	if err != nil {
+	//		c.AbortWithError(http.StatusInternalServerError, err)
+	//
+	//		return
+	//	}
+	//
+	//	userRepo := repository.NewUserRepository(db.GetDB())
+	//	u, err := userRepo.FindByEmail(user.Email)
+	//	if err == pg.ErrNoRows {
+	//		userRepo.Create(types.CreateUserRequest{
+	//			Email: user.Email,
+	//			Name: user.Name,
+	//		})
+	//	}
+	//
+	//	if err != nil {
+	//		c.AbortWithError(http.StatusInternalServerError, err)
+	//
+	//		return
+	//	}
+	//
+	//	c.JSON(200, u)
 }
