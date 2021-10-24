@@ -7,6 +7,15 @@ import (
 	"text/template"
 )
 
+var (
+	// AppVersion represents OnePaaS version
+	AppVersion string
+	// GitCommitHash represents OnePaaS commit hash
+	GitCommitHash string
+	// BuildTime represents OnePaaS build time
+	BuildTime string
+)
+
 type version struct {
 	AppVersion    string `default:"unknown-app-version"`
 	GoVersion     string

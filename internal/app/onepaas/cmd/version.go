@@ -7,15 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// AppVersion represents OnePaaS version
-	AppVersion string
-	// GitCommit represents OnePaaS commit hash
-	GitCommitHash string
-	// BuildTime represents OnePaaS build time
-	BuildTime string
-)
-
 // NewVersionCommand creates the version sub-command
 func NewVersionCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
@@ -29,7 +20,7 @@ func NewVersionCommand() *cobra.Command {
 }
 
 func runVersion(_ *cobra.Command, _ []string) error {
-	v := version.NewVersion(AppVersion, GitCommitHash, BuildTime)
+	v := version.NewVersion(version.AppVersion, version.GitCommitHash, version.BuildTime)
 
 	output, err := v.Render()
 	if err != nil {

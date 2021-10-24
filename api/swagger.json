@@ -1,0 +1,317 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "The purpose of OnePaaS is to provide an application that is using your infrastructure easily.",
+    "title": "OnePaaS API",
+    "termsOfService": "There are no TOS at this moment, use at your own risk we take no responsibility.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "unknown-version"
+  },
+  "paths": {
+    "/v1/projects": {
+      "get": {
+        "description": "List of projects",
+        "produces": [
+          "application/json",
+          "application/problem+json"
+        ],
+        "tags": [
+          "project"
+        ],
+        "operationId": "listProject",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/v1.ProjectList"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new Project",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/problem+json"
+        ],
+        "tags": [
+          "project"
+        ],
+        "operationId": "createProject",
+        "parameters": [
+          {
+            "description": "Add project",
+            "name": "project",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1.Project"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/v1.Project"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{id}": {
+      "get": {
+        "description": "Read the specified project",
+        "produces": [
+          "application/json",
+          "application/problem+json"
+        ],
+        "tags": [
+          "project"
+        ],
+        "operationId": "readProject",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "project id",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/v1.Project"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Replace the specified project",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/problem+json"
+        ],
+        "tags": [
+          "project"
+        ],
+        "operationId": "replaceProject",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "project id",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "project",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1.Project"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/v1.Project"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/v1.Problem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "v1.Metadata": {
+      "description": "Metadata represents the metadata for any resource",
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "description": "CreatedAt is a timestamp representing the server time when this object was created. Clients can not set this value. It is represented in RFC3339 form and is in UTC.\nPopulated by the system.",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt",
+          "readOnly": true,
+          "example": "2021-09-30T10:22:58.754407751+02:00"
+        },
+        "modified_at": {
+          "description": "ModifiedAt is a timestamp representing the server time when this object was modified. Clients can not set this value. It is represented in RFC3339 form and is in UTC.\nPopulated by the system.",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "ModifiedAt",
+          "readOnly": true,
+          "example": "2021-09-30T10:22:58.754407751+02:00"
+        },
+        "uid": {
+          "description": "UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.\nPopulated by the system.",
+          "type": "string",
+          "x-go-name": "UID",
+          "readOnly": true,
+          "example": "01FGTWSBE2RXS960T1TRN6W9D8"
+        }
+      },
+      "x-go-name": "Metadata",
+      "x-go-package": "github.com/onepaas/onepaas/pkg/api/v1"
+    },
+    "v1.Problem": {
+      "description": "Problem is an `Problem` implementation",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Detail is a human-readable explanation specific to this occurrence of the problem.",
+          "type": "string",
+          "x-go-name": "Detail",
+          "example": "Your request parameters didn't validate."
+        },
+        "instance": {
+          "description": "Instance is a URI reference that identifies the specific occurrence of the problem.",
+          "type": "string",
+          "x-go-name": "Instance",
+          "example": "/projects/01FGTWSBE2RXS960T1TRN6W9D8"
+        },
+        "status": {
+          "description": "Status The HTTP status code generated by the origin server for this occurrence of the problem.",
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "422"
+        },
+        "title": {
+          "description": "Title is a short, human-readable summary of the problem type.",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "Unprocessable Entity"
+        },
+        "type": {
+          "description": "Type is a URI reference [RFC3986] that identifies the problem type.",
+          "type": "string",
+          "x-go-name": "Type",
+          "example": "about:default"
+        }
+      },
+      "x-go-name": "Problem",
+      "x-go-package": "github.com/onepaas/onepaas/pkg/api/v1"
+    },
+    "v1.Project": {
+      "description": "Project represents the project",
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "readOnly": true,
+          "description": "Metadata Standard object.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/v1.Metadata"
+            }
+          ]
+        },
+        "spec": {
+          "$ref": "#/definitions/v1.ProjectSpec"
+        }
+      },
+      "x-go-name": "Project",
+      "x-go-package": "github.com/onepaas/onepaas/pkg/api/v1"
+    },
+    "v1.ProjectList": {
+      "description": "ProjectList represents the list of project",
+      "type": "object",
+      "properties": {
+        "items": {
+          "description": "Items is the list of Projects.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1.Project"
+          },
+          "x-go-name": "Items"
+        }
+      },
+      "x-go-name": "ProjectList",
+      "x-go-package": "github.com/onepaas/onepaas/pkg/api/v1"
+    },
+    "v1.ProjectSpec": {
+      "description": "ProjectSpec represents the project specifications",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "Description is project description.",
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "name": {
+          "description": "Name is project name.",
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-name": "ProjectSpec",
+      "x-go-package": "github.com/onepaas/onepaas/pkg/api/v1"
+    }
+  }
+}

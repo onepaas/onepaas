@@ -1,39 +1,24 @@
 package model
 
 import (
-	"context"
+	"gorm.io/gorm"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/onepaas/onepaas/internal/pkg/ulid"
 )
 
 type User struct {
-	Id         string    `json:"id" pg:"type:varchar(26)"`
-	Email      string    `json:"email" pg:"type:varchar(255)"`
-	Password   string	 `json:"-" pg:"type:text"`
-	Name       string    `json:"name" pg:"type:varchar(255)"`
-	Meta       struct{}  `json:"-" pg:"type:jsonb"`
-	CreatedAt  time.Time `json:"created_at" pg:"type:timestamptz"`
-	ModifiedAt time.Time `json:"modified_at" pg:"type:timestamptz"`
+	Id         string     `json:"id" gorm:"type:string;size:26;primaryKey"`
+	Name       string     `json:"name" gorm:"type:string;size:255"`
+	Email      string     `json:"email" gorm:"type:string;size:255"`
+	Meta       struct{}   `json:"-" gorm:"type:jsonb"`
+	CreatedAt  time.Time  `json:"created_at" gorm:"autoCreateTime"`
+	ModifiedAt time.Time  `json:"modified_at" gorm:"autoUpdateTime"`
+	Identities []Identity `json:"-" gorm:"foreignKey:UserId"`
 }
 
-var _ pg.BeforeInsertHook = (*User)(nil)
+func (i *User) BeforeCreate(tx *gorm.DB) (err error) {
+	i.Id = ulid.Generate()
 
-func (u *User) BeforeInsert(ctx context.Context) (context.Context, error) {
-	now := time.Now().UTC()
-
-	u.Id = ulid.Generate()
-	u.CreatedAt = now
-	u.ModifiedAt = now
-
-	return ctx, nil
-}
-
-var _ pg.BeforeUpdateHook = (*User)(nil)
-
-func (u *User) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	u.ModifiedAt = time.Now().UTC()
-
-	return ctx, nil
+	return
 }

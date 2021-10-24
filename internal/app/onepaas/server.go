@@ -2,7 +2,12 @@ package onepaas
 
 import (
 	"context"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/onepaas/onepaas/internal/app/onepaas/handler"
+	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
 	"github.com/onepaas/onepaas/internal/pkg/auth"
+	"github.com/onepaas/onepaas/internal/pkg/database"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,8 +15,6 @@ import (
 	"time"
 
 	"github.com/gin-contrib/logger"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/onepaas/onepaas/internal/app/onepaas/controller"
 	_ "github.com/onepaas/onepaas/internal/pkg/validator"
@@ -56,6 +59,14 @@ func (as *ApiServer) setupRoutes() {
 		oauth := controller.NewOAuthController(auth.NewAuthenticator())
 		v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
 		v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
+
+		db := database.InitDB()
+		projectRespository := repository.NewProjectRepository(db)
+		projects := handler.ProjectsHandler{ProjectRepository: projectRespository}
+		v1.GET("/projects", projects.ListProject)
+		v1.POST("/projects", projects.CreateProject)
+		v1.GET("/projects/:id", projects.ReadProject)
+		v1.PUT("/projects/:id", projects.ReplaceProject)
 	}
 }
 
