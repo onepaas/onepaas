@@ -36,3 +36,14 @@ CREATE TABLE projects (
 
 CREATE INDEX projects_created_at_idx ON projects USING brin(created_at);
 CREATE INDEX projects_modified_at_idx ON projects USING brin(modified_at);
+
+CREATE TABLE applications (
+    id varchar(26) PRIMARY KEY,
+    name varchar(253) NULL,
+    repository_url text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX applications_created_at_idx ON applications USING brin(created_at);
+CREATE INDEX applications_modified_at_idx ON applications USING brin(modified_at);

@@ -67,6 +67,12 @@ func (as *ApiServer) setupRoutes() {
 		v1.POST("/projects", projects.CreateProject)
 		v1.GET("/projects/:id", projects.ReadProject)
 		v1.PUT("/projects/:id", projects.ReplaceProject)
+
+		apps := v1.Group("/applications")
+		{
+			applications := handler.ApplicationsHandler{ApplicationRepository: repository.NewApplicationRepository(db)}
+			apps.POST("/", applications.CreateApplication)
+		}
 	}
 }
 
@@ -87,12 +93,12 @@ func (as *ApiServer) Run() error {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with
+	// Wait for interrupt signal to gracefully shut down the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
+	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info().Msg("Shutting down server...")
