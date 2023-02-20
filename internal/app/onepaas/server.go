@@ -2,11 +2,8 @@ package onepaas
 
 import (
 	"context"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/onepaas/onepaas/internal/app/onepaas/handler"
 	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
-	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"github.com/onepaas/onepaas/internal/pkg/database"
 	"net/http"
 	"os"
@@ -53,12 +50,12 @@ func (as *ApiServer) setupRoutes() {
 		//v1.GET("/users/:id", users.View)
 
 		// TODO Get Secret key from config
-		store := cookie.NewStore([]byte("secret"))
-		sessionMiddleware := sessions.Sessions("ONEPAAS", store)
-
-		oauth := controller.NewOAuthController(auth.NewAuthenticator())
-		v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
-		v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
+		//store := cookie.NewStore([]byte("secret"))
+		//sessionMiddleware := sessions.Sessions("ONEPAAS", store)
+		//
+		//oauth := controller.NewOAuthController(auth.NewAuthenticator())
+		//v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
+		//v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
 
 		db := database.InitDB()
 		projectRespository := repository.NewProjectRepository(db)

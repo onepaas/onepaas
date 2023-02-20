@@ -9,10 +9,10 @@ type Application struct {
 // ApplicationSpec represents the application specifications
 type ApplicationSpec struct {
 	// Name is application name.
-	Name string `json:"name" binding:"required"`
+	Name string `json:"name" validate:"required"`
 
 	// RepositoryURL is application's GIT repository URL
-	RepositoryURL string `json:"repository_url" binding:"required"`
+	RepositoryURL string `json:"repository_url" validate:"required,url"`
 }
 
 // ApplicationList represents the list of applications

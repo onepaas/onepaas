@@ -18,14 +18,19 @@ type ApplicationsHandler struct {
 
 // CreateApplication adds a new application.
 func (a *ApplicationsHandler) CreateApplication(c *gin.Context) {
-	var applicationAPI v1.Application
+	var appSpec v1.ApplicationSpec
 
-	if err := c.ShouldBindJSON(&applicationAPI); err != nil {
+	if err := c.ShouldBindJSON(&appSpec); err != nil {
+		_, _ = problem.NewStatusProblem(http.StatusUnprocessableEntity).Write(c.Writer)
+		return
+	}
+
+	if err := validator.New().Struct(appSpec); err != nil {
 		_, _ = problem.NewValidationProblem(err.(validator.ValidationErrors)).Write(c.Writer)
 		return
 	}
 
-	applicationModel := model.NewApplication(applicationAPI)
+	applicationModel := model.NewApplication(v1.Application{Spec: appSpec})
 
 	err := a.ApplicationRepository.Create(c, applicationModel)
 	if err != nil {
