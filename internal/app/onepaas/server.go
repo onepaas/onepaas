@@ -70,6 +70,12 @@ func (as *ApiServer) setupRoutes() {
 			applications := handler.ApplicationsHandler{ApplicationRepository: repository.NewApplicationRepository(db)}
 			apps.POST("/", applications.CreateApplication)
 		}
+
+		regs := v1.Group("/registries")
+		{
+			registries := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
+			regs.POST("/", registries.CreateRegistry)
+		}
 	}
 }
 

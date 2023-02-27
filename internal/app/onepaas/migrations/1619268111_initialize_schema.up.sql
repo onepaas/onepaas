@@ -47,3 +47,15 @@ CREATE TABLE applications (
 
 CREATE INDEX applications_created_at_idx ON applications USING brin(created_at);
 CREATE INDEX applications_modified_at_idx ON applications USING brin(modified_at);
+
+CREATE TABLE registries (
+    id varchar(26) PRIMARY KEY,
+    url text NOT NULL,
+    username varchar(253) NULL,
+    secret text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX registries_created_at_idx ON registries USING brin(created_at);
+CREATE INDEX registries_modified_at_idx ON registries USING brin(modified_at);
