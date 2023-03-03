@@ -59,3 +59,14 @@ CREATE TABLE registries (
 
 CREATE INDEX registries_created_at_idx ON registries USING brin(created_at);
 CREATE INDEX registries_modified_at_idx ON registries USING brin(modified_at);
+
+CREATE TABLE servers (
+    id varchar(26) PRIMARY KEY,
+    type varchar(20) NOT NULL,
+    properties json NULL,
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX servers_created_at_idx ON registries USING brin(created_at);
+CREATE INDEX servers_modified_at_idx ON registries USING brin(modified_at);
