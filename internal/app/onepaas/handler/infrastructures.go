@@ -11,14 +11,14 @@ import (
 	"net/http"
 )
 
-// ServersHandler represents servers handler
-type ServersHandler struct {
-	ServerRepository repository.ServerRepository
+// InfrastructuresHandler represents infra-structures handler
+type InfrastructuresHandler struct {
+	InfraRepository repository.InfrastructureRepository
 }
 
-// CreateServer creates a new server
-func (h *ServersHandler) CreateServer(c *gin.Context) {
-	var spec v1.ServerSpec
+// CreateInfra creates a new infra-structure
+func (h *InfrastructuresHandler) CreateInfra(c *gin.Context) {
+	var spec v1.InfrastructureSpec
 
 	if err := c.ShouldBindJSON(&spec); err != nil {
 		_, _ = problem.NewStatusProblem(http.StatusUnprocessableEntity).Write(c.Writer)
@@ -30,21 +30,21 @@ func (h *ServersHandler) CreateServer(c *gin.Context) {
 		return
 	}
 
-	serverModel, err := model.NewServer(v1.Server{Spec: spec})
+	infraModel, err := model.NewInfrastructure(v1.Infrastructure{Spec: spec})
 	if err != nil {
 		log.Error().Err(err).Msg("could not create db model")
 		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 		return
 	}
 
-	err = h.ServerRepository.Create(c, serverModel)
+	err = h.InfraRepository.Create(c, infraModel)
 	if err != nil {
 		log.Error().Err(err).Msg("could not save db model")
 		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 		return
 	}
 
-	respObject, err := serverModel.MarshalServerAPI()
+	respObject, err := infraModel.MarshalInfrastructureAPI()
 	if err != nil {
 		log.Error().Err(err).Msg("could not marshal response object")
 		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)

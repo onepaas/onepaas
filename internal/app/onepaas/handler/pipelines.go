@@ -15,7 +15,7 @@ type PipelinesHandler struct {
 }
 
 // RunPipelineFromGithub trigger a pipeline for an application from GitHub
-func (a *PipelinesHandler) RunPipelineFromGithub(c *gin.Context) {
+func (p *PipelinesHandler) RunPipelineFromGithub(c *gin.Context) {
 	var hookHeaderSpec v1.GithubHookHeaderSpec
 
 	if err := c.ShouldBindHeader(&hookHeaderSpec); err != nil {
@@ -42,7 +42,11 @@ func (a *PipelinesHandler) RunPipelineFromGithub(c *gin.Context) {
 		return
 	}
 
-	// TODO: Find and fetch application details
+	_, err := p.ApplicationRepository.FindByID(c, c.Param("id"))
+	if err != nil {
+		_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
+		return
+	}
 
 	// TODO: Trigger Temporal workflow
 

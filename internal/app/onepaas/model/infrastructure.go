@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Server struct {
+type Infrastructure struct {
 	Id         string      `json:"id" gorm:"->;<-:create;type:string;size:26;primaryKey"`
 	Type       string      `json:"type" gorm:"type:string;size:20;not null"`
 	Properties pgtype.JSON `json:"properties" gorm:"type:json;default:{};not null"`
@@ -16,30 +16,30 @@ type Server struct {
 	ModifiedAt time.Time   `json:"modified_at" gorm:"autoUpdateTime"`
 }
 
-func NewServer(server v1.Server) (*Server, error) {
-	model := &Server{
-		Type: server.Spec.Type,
+func NewInfrastructure(infra v1.Infrastructure) (*Infrastructure, error) {
+	model := &Infrastructure{
+		Type: infra.Spec.Type,
 	}
 
-	err := model.Properties.Set(server.Spec.Properties)
+	err := model.Properties.Set(infra.Spec.Properties)
 
 	return model, err
 }
 
-func (m *Server) BeforeCreate(*gorm.DB) (err error) {
+func (m *Infrastructure) BeforeCreate(*gorm.DB) (err error) {
 	m.Id = ulid.Generate()
 
 	return
 }
 
-func (m *Server) MarshalServerAPI() (v1.Server, error) {
-	apiModel := v1.Server{
+func (m *Infrastructure) MarshalInfrastructureAPI() (v1.Infrastructure, error) {
+	apiModel := v1.Infrastructure{
 		Metadata: v1.Metadata{
 			UID:        m.Id,
 			CreatedAt:  m.CreatedAt,
 			ModifiedAt: m.ModifiedAt,
 		},
-		Spec: v1.ServerSpec{
+		Spec: v1.InfrastructureSpec{
 			Type: m.Type,
 		},
 	}
