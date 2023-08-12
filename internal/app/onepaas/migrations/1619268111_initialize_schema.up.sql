@@ -27,7 +27,8 @@ CREATE INDEX users_modified_at_idx ON users USING brin(modified_at);
 
 CREATE TABLE projects (
         id varchar(26) PRIMARY KEY,
-        name varchar(253) NULL,
+        name varchar(253) NOT NULL,
+        slug varchar(253) NOT NULL,
         description text NOT NULL,
         meta jsonb DEFAULT '{}',
         created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,

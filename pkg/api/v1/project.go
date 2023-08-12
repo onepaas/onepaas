@@ -17,10 +17,13 @@ type Project struct {
 // swagger:model v1-ProjectSpec
 type ProjectSpec struct {
 	// Name is project name.
-	Name string `json:"name" binding:"required"`
+	Name string `json:"name" validate:"required"`
+
+	// Slug is computed slug based on Name
+	Slug string `json:"slug"`
 
 	// Description is project description.
-	Description string `json:"description" binding:"required"`
+	Description string `json:"description"`
 }
 
 // ProjectList represents the list of project

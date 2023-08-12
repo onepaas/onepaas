@@ -58,12 +58,17 @@ func (as *ApiServer) setupRoutes() {
 		//v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
 
 		db := database.InitDB()
-		projectRespository := repository.NewProjectRepository(db)
-		projects := handler.ProjectsHandler{ProjectRepository: projectRespository}
-		v1.GET("/projects", projects.ListProject)
-		v1.POST("/projects", projects.CreateProject)
-		v1.GET("/projects/:id", projects.ReadProject)
-		v1.PUT("/projects/:id", projects.ReplaceProject)
+
+		projects := v1.Group("/projects")
+		{
+			repo := repository.NewProjectRepository(db)
+			handlers := handler.ProjectsHandler{ProjectRepository: repo}
+
+			projects.GET("/", handlers.ListProjects)
+			projects.POST("/", handlers.CreateProject)
+			projects.GET("/:id", handlers.GetProject)
+			projects.PUT("/:id", handlers.ReplaceProject)
+		}
 
 		apps := v1.Group("/applications")
 		{
@@ -78,10 +83,10 @@ func (as *ApiServer) setupRoutes() {
 			}
 		}
 
-		regs := v1.Group("/registries")
+		registries := v1.Group("/registries")
 		{
-			registries := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
-			regs.POST("/", registries.CreateRegistry)
+			handlers := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
+			registries.POST("/", handlers.CreateRegistry)
 		}
 
 		infras := v1.Group("/infrastructures")

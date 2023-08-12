@@ -5,7 +5,7 @@ services:
       dockerfile: dev.Dockerfile
       context: ./
       args:
-        GO_VERSION: 1.19
+        GO_VERSION: "1.20"
     container_name: onepaas-api
     ports:
       - "8080:8080"
