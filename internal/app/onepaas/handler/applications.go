@@ -82,3 +82,20 @@ func (a *ApplicationsHandler) GetApplication(c *gin.Context) {
 
 	c.JSON(http.StatusOK, record.MarshalApplicationAPI())
 }
+
+// DeleteApplication deletes an application
+func (a *ApplicationsHandler) DeleteApplication(c *gin.Context) {
+	if err := a.ApplicationRepository.Delete(c, c.Param("id")); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
+			return
+		}
+
+		log.Error().Err(err).Send()
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
+
+		return
+	}
+
+	c.JSON(http.StatusNoContent, "")
+}

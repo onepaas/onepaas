@@ -12,6 +12,7 @@ type ApplicationRepository interface {
 	FindByID(ctx context.Context, id string) (model.Application, error)
 	Create(ctx context.Context, application *model.Application) error
 	Update(ctx context.Context, application *model.Application, values model.Application) error
+	Delete(ctx context.Context, id string) error
 }
 
 type applicationRepository struct {
@@ -35,6 +36,18 @@ func (a *applicationRepository) FindByID(_ context.Context, id string) (model.Ap
 	result := a.DB.First(&application, "id = ?", id)
 
 	return application, result.Error
+}
+
+func (a *applicationRepository) Delete(_ context.Context, id string) error {
+	//var application model.Application
+	//result := a.DB.Delete(&application, "id = ?", id)
+	result := a.DB.Delete(model.Application{Id: id})
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return result.Error
 }
 
 func (a *applicationRepository) Create(_ context.Context, application *model.Application) error {
