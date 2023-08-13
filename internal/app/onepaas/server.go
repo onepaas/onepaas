@@ -77,6 +77,7 @@ func (as *ApiServer) setupRoutes() {
 
 			apps.POST("/", handlers.CreateApplication)
 			apps.GET("/", handlers.ListApplications)
+			apps.GET("/:id", handlers.GetApplication)
 
 			pipelinesGroup := apps.Group("/:id/pipelines")
 			{

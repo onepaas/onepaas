@@ -117,18 +117,12 @@ func (p *ProjectsHandler) GetProject(c *gin.Context) {
 	project, err := p.ProjectRepository.FindByID(c, c.Param("id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			problem.NewStatusProblem(http.StatusNotFound).
-				Write(c.Writer)
-
+			_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
 			return
 		}
 
-		log.Error().
-			Err(err).
-			Send()
-
-		problem.NewStatusProblem(http.StatusInternalServerError).
-			Write(c.Writer)
+		log.Error().Err(err).Send()
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 
 		return
 	}

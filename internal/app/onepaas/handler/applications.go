@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/onepaas/onepaas/internal/app/onepaas/model"
@@ -8,6 +9,7 @@ import (
 	v1 "github.com/onepaas/onepaas/pkg/api/v1"
 	"github.com/onepaas/onepaas/pkg/problem"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -61,4 +63,22 @@ func (a *ApplicationsHandler) ListApplications(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, v1.ApplicationList{Items: apps})
+}
+
+// GetApplication returns details of one application
+func (a *ApplicationsHandler) GetApplication(c *gin.Context) {
+	record, err := a.ApplicationRepository.FindByID(c, c.Param("id"))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
+			return
+		}
+
+		log.Error().Err(err).Send()
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, record.MarshalApplicationAPI())
 }
