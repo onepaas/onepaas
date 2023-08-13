@@ -45,3 +45,20 @@ func (a *ApplicationsHandler) CreateApplication(c *gin.Context) {
 
 	c.JSON(http.StatusOK, applicationModel.MarshalApplicationAPI())
 }
+
+// ListApplications returns list of all applications
+func (a *ApplicationsHandler) ListApplications(c *gin.Context) {
+	list, err := a.ApplicationRepository.FindAll(c)
+	if err != nil {
+		log.Error().Err(err).Send()
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
+		return
+	}
+
+	apps := make([]v1.Application, 0)
+	for _, app := range list {
+		apps = append(apps, app.MarshalApplicationAPI())
+	}
+
+	c.JSON(http.StatusOK, v1.ApplicationList{Items: apps})
+}

@@ -72,13 +72,15 @@ func (as *ApiServer) setupRoutes() {
 
 		apps := v1.Group("/applications")
 		{
-			appRepository := repository.NewApplicationRepository(db)
-			applications := handler.ApplicationsHandler{ApplicationRepository: appRepository}
-			apps.POST("/", applications.CreateApplication)
+			repo := repository.NewApplicationRepository(db)
+			handlers := handler.ApplicationsHandler{ApplicationRepository: repo}
+
+			apps.POST("/", handlers.CreateApplication)
+			apps.GET("/", handlers.ListApplications)
 
 			pipelinesGroup := apps.Group("/:id/pipelines")
 			{
-				pipelineHandlers := handler.PipelinesHandler{ApplicationRepository: appRepository}
+				pipelineHandlers := handler.PipelinesHandler{ApplicationRepository: repo}
 				pipelinesGroup.POST("/github", pipelineHandlers.RunPipelineFromGithub)
 			}
 		}

@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/onepaas/onepaas/internal/app/onepaas/model"
 	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
-	v1 "github.com/onepaas/onepaas/pkg/api/v1"
+	"github.com/onepaas/onepaas/pkg/api/v1"
 	"github.com/onepaas/onepaas/pkg/problem"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
