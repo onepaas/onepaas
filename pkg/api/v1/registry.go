@@ -17,3 +17,9 @@ type RegistrySpec struct {
 	// Secret is registry secret
 	Secret string `json:"secret" validate:"required"`
 }
+
+// RegistryList represents the list of registries
+type RegistryList struct {
+	// Items is the list of registries
+	Items []Registry `json:"items"`
+}

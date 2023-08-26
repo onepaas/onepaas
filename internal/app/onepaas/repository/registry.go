@@ -9,6 +9,7 @@ import (
 // RegistryRepository contains the interface for a model.Registry repository
 type RegistryRepository interface {
 	Create(ctx context.Context, registry *model.Registry) error
+	FindAll(ctx context.Context) ([]model.Registry, error)
 }
 
 type registryRepository struct {
@@ -24,4 +25,11 @@ func (r *registryRepository) Create(_ context.Context, registry *model.Registry)
 	result := r.DB.Create(&registry)
 
 	return result.Error
+}
+
+func (r *registryRepository) FindAll(_ context.Context) ([]model.Registry, error) {
+	list := make([]model.Registry, 0)
+	result := r.DB.Find(&list)
+
+	return list, result.Error
 }

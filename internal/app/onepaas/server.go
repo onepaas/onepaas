@@ -91,6 +91,7 @@ func (as *ApiServer) setupRoutes() {
 		{
 			handlers := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
 			registries.POST("/", handlers.CreateRegistry)
+			registries.GET("/", handlers.ListRegistries)
 		}
 
 		infras := v1.Group("/infrastructures")
