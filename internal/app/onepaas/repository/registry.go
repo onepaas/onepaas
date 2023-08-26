@@ -9,6 +9,7 @@ import (
 // RegistryRepository contains the interface for a model.Registry repository
 type RegistryRepository interface {
 	Create(ctx context.Context, registry *model.Registry) error
+	FindByID(_ context.Context, id string) (model.Registry, error)
 	FindAll(ctx context.Context) ([]model.Registry, error)
 }
 
@@ -19,6 +20,13 @@ type registryRepository struct {
 // NewRegistryRepository creates a RegistryRepository
 func NewRegistryRepository(db *gorm.DB) RegistryRepository {
 	return &registryRepository{DB: db}
+}
+
+func (r *registryRepository) FindByID(_ context.Context, id string) (model.Registry, error) {
+	var record model.Registry
+	result := r.DB.First(&record, "id = ?", id)
+
+	return record, result.Error
 }
 
 func (r *registryRepository) Create(_ context.Context, registry *model.Registry) error {

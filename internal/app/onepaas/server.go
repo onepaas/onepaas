@@ -92,12 +92,15 @@ func (as *ApiServer) setupRoutes() {
 			handlers := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
 			registries.POST("/", handlers.CreateRegistry)
 			registries.GET("/", handlers.ListRegistries)
+			registries.GET("/:id", handlers.GetRegistry)
 		}
 
 		infras := v1.Group("/infrastructures")
 		{
-			infrasHandler := handler.InfrastructuresHandler{InfraRepository: repository.NewInfraRepository(db)}
-			infras.POST("/", infrasHandler.CreateInfra)
+			handlers := handler.InfrastructuresHandler{InfraRepository: repository.NewInfraRepository(db)}
+			infras.POST("/", handlers.Create)
+			infras.GET("/", handlers.List)
+			infras.GET("/:id", handlers.Get)
 		}
 	}
 }

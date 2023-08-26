@@ -14,3 +14,9 @@ type InfrastructureSpec struct {
 	// Properties contains infra-structure properties
 	Properties map[string]string `json:"properties" validate:"required"`
 }
+
+// InfrastructureList represents the list of infrastructures
+type InfrastructureList struct {
+	// Items is the list of infrastructures
+	Items []Infrastructure `json:"items"`
+}
