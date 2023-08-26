@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/onepaas/onepaas/internal/app/onepaas/model"
 	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
-	v1 "github.com/onepaas/onepaas/pkg/api/v1"
+	"github.com/onepaas/onepaas/pkg/api/v1"
 	"github.com/onepaas/onepaas/pkg/problem"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
@@ -21,7 +21,7 @@ type ProjectsHandler struct {
 // CreateProject adds a new project.
 // swagger:operation POST /v1/projects project createProject
 //
-// Create a new Project
+// # Create a new Project
 //
 // ---
 // produces:
@@ -32,55 +32,60 @@ type ProjectsHandler struct {
 // - application/json
 //
 // parameters:
-// - description: Add project
-//   in: body
-//   name: project
-//   required: true
-//   schema:
-//	     $ref: "#/definitions/v1-Project"
+//   - description: Add project
+//     in: body
+//     name: project
+//     required: true
+//     schema:
+//     $ref: "#/definitions/v1-Project"
 //
 // responses:
-//  '201':
-//    description: "Created"
-//    schema:
-//	    "$ref": "#/definitions/v1-Project"
-//  '422':
-//    description: "Unprocessable Entity"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-//  '500':
-//    description: "Internal Server Error"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
+//
+//	 '201':
+//	   description: "Created"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Project"
+//	 '422':
+//	   description: "Unprocessable Entity"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+//	 '500':
+//	   description: "Internal Server Error"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
 func (p *ProjectsHandler) CreateProject(c *gin.Context) {
-	var projectAPI v1.Project
+	var spec v1.ProjectSpec
 
-	if err := c.ShouldBindJSON(&projectAPI); err != nil {
-		problem.NewValidationProblem(err.(validator.ValidationErrors)).Write(c.Writer)
+	if err := c.ShouldBindJSON(&spec); err != nil {
+		_, _ = problem.NewStatusProblem(http.StatusUnprocessableEntity).Write(c.Writer)
 		return
 	}
 
-	projectModel := model.NewProject(projectAPI)
+	if err := validator.New().Struct(spec); err != nil {
+		_, _ = problem.NewValidationProblem(err.(validator.ValidationErrors)).Write(c.Writer)
+		return
+	}
 
-	err := p.ProjectRepository.Create(c, projectModel)
+	newModel := model.NewProject(v1.Project{Spec: spec})
+
+	err := p.ProjectRepository.Create(c, newModel)
 	if err != nil {
 		log.Error().
 			Err(err).
 			Send()
 
-		problem.NewStatusProblem(http.StatusInternalServerError).
-			Write(c.Writer)
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 
 		return
 	}
 
-	c.JSON(http.StatusOK, projectModel.MarshalProjectAPI())
+	c.JSON(http.StatusOK, newModel.MarshalProjectAPI())
 }
 
-// ReadProject read the specified project.
+// GetProject read the specified project.
 // swagger:operation GET /v1/projects/{id} project readProject
 //
-// Read the specified project
+// # Read the specified project
 //
 // ---
 // produces:
@@ -88,41 +93,36 @@ func (p *ProjectsHandler) CreateProject(c *gin.Context) {
 // - application/problem+json
 //
 // parameters:
-// - name: id
-//   in: path
-//   description: project id
-//   type: string
-//   required: true
+//   - name: id
+//     in: path
+//     description: project id
+//     type: string
+//     required: true
 //
 // responses:
-//  '200':
-//    description: "OK"
-//    schema:
-//	    "$ref": "#/definitions/v1-Project"
-//  '404':
-//    description: "Not Found"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-//  '500':
-//    description: "Internal Server Error"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-func (p *ProjectsHandler) ReadProject(c *gin.Context) {
+//
+//	 '200':
+//	   description: "OK"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Project"
+//	 '404':
+//	   description: "Not Found"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+//	 '500':
+//	   description: "Internal Server Error"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+func (p *ProjectsHandler) GetProject(c *gin.Context) {
 	project, err := p.ProjectRepository.FindByID(c, c.Param("id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			problem.NewStatusProblem(http.StatusNotFound).
-				Write(c.Writer)
-
+			_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
 			return
 		}
 
-		log.Error().
-			Err(err).
-			Send()
-
-		problem.NewStatusProblem(http.StatusInternalServerError).
-			Write(c.Writer)
+		log.Error().Err(err).Send()
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 
 		return
 	}
@@ -133,7 +133,7 @@ func (p *ProjectsHandler) ReadProject(c *gin.Context) {
 // ReplaceProject replace a project.
 // swagger:operation PUT /v1/projects/{id} project replaceProject
 //
-// Replace the specified project
+// # Replace the specified project
 //
 // ---
 // produces:
@@ -144,34 +144,35 @@ func (p *ProjectsHandler) ReadProject(c *gin.Context) {
 // - application/json
 //
 // parameters:
-// - name: id
-//   in: path
-//   description: project id
-//   type: string
-//   required: true
-// - name: project
-//   in: body
-//   required: true
-//   schema:
+//   - name: id
+//     in: path
+//     description: project id
+//     type: string
+//     required: true
+//   - name: project
+//     in: body
+//     required: true
+//     schema:
 //     "$ref": "#/definitions/v1-Project"
 //
 // responses:
-//  '200':
-//    description: "OK"
-//    schema:
-//	    "$ref": "#/definitions/v1-Project"
-//  '404':
-//    description: "Not Found"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-//  '422':
-//    description: "Unprocessable Entity"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-//  '500':
-//    description: "Internal Server Error"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
+//
+//	 '200':
+//	   description: "OK"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Project"
+//	 '404':
+//	   description: "Not Found"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+//	 '422':
+//	   description: "Unprocessable Entity"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+//	 '500':
+//	   description: "Internal Server Error"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
 func (p *ProjectsHandler) ReplaceProject(c *gin.Context) {
 	var projectAPI v1.Project
 
@@ -183,8 +184,7 @@ func (p *ProjectsHandler) ReplaceProject(c *gin.Context) {
 	project, err := p.ProjectRepository.FindByID(c, c.Param("id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			problem.NewStatusProblem(http.StatusNotFound).
-				Write(c.Writer)
+			_, _ = problem.NewStatusProblem(http.StatusNotFound).Write(c.Writer)
 
 			return
 		}
@@ -193,8 +193,7 @@ func (p *ProjectsHandler) ReplaceProject(c *gin.Context) {
 			Err(err).
 			Send()
 
-		problem.NewStatusProblem(http.StatusInternalServerError).
-			Write(c.Writer)
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 
 		return
 	}
@@ -224,10 +223,10 @@ func (p *ProjectsHandler) ReplaceProject(c *gin.Context) {
 	c.JSON(http.StatusOK, project.MarshalProjectAPI())
 }
 
-// ListProject list of projects.
+// ListProjects list of projects.
 // swagger:operation GET /v1/projects project listProject
 //
-// List of projects
+// # List of projects
 //
 // ---
 // produces:
@@ -235,19 +234,20 @@ func (p *ProjectsHandler) ReplaceProject(c *gin.Context) {
 // - application/problem+json
 //
 // responses:
-//  '200':
-//    description: "OK"
-//    schema:
-//	    "$ref": "#/definitions/v1-ProjectList"
-//  '500':
-//    description: "Internal Server Error"
-//    schema:
-//	    "$ref": "#/definitions/v1-Problem"
-func (p *ProjectsHandler) ListProject(c *gin.Context) {
+//
+//	 '200':
+//	   description: "OK"
+//	   schema:
+//		    "$ref": "#/definitions/v1-ProjectList"
+//	 '500':
+//	   description: "Internal Server Error"
+//	   schema:
+//		    "$ref": "#/definitions/v1-Problem"
+func (p *ProjectsHandler) ListProjects(c *gin.Context) {
 	projectEntities, err := p.ProjectRepository.FindAll(c)
 	if err != nil {
 		log.Error().Err(err).Send()
-		problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
+		_, _ = problem.NewStatusProblem(http.StatusInternalServerError).Write(c.Writer)
 		return
 	}
 

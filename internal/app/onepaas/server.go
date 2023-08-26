@@ -2,11 +2,8 @@ package onepaas
 
 import (
 	"context"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/onepaas/onepaas/internal/app/onepaas/handler"
 	"github.com/onepaas/onepaas/internal/app/onepaas/repository"
-	"github.com/onepaas/onepaas/internal/pkg/auth"
 	"github.com/onepaas/onepaas/internal/pkg/database"
 	"net/http"
 	"os"
@@ -53,20 +50,58 @@ func (as *ApiServer) setupRoutes() {
 		//v1.GET("/users/:id", users.View)
 
 		// TODO Get Secret key from config
-		store := cookie.NewStore([]byte("secret"))
-		sessionMiddleware := sessions.Sessions("ONEPAAS", store)
-
-		oauth := controller.NewOAuthController(auth.NewAuthenticator())
-		v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
-		v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
+		//store := cookie.NewStore([]byte("secret"))
+		//sessionMiddleware := sessions.Sessions("ONEPAAS", store)
+		//
+		//oauth := controller.NewOAuthController(auth.NewAuthenticator())
+		//v1.GET("/oauth/authorize", sessionMiddleware, oauth.Authorize)
+		//v1.GET("/oauth/callback", sessionMiddleware, oauth.Callback)
 
 		db := database.InitDB()
-		projectRespository := repository.NewProjectRepository(db)
-		projects := handler.ProjectsHandler{ProjectRepository: projectRespository}
-		v1.GET("/projects", projects.ListProject)
-		v1.POST("/projects", projects.CreateProject)
-		v1.GET("/projects/:id", projects.ReadProject)
-		v1.PUT("/projects/:id", projects.ReplaceProject)
+
+		projects := v1.Group("/projects")
+		{
+			repo := repository.NewProjectRepository(db)
+			handlers := handler.ProjectsHandler{ProjectRepository: repo}
+
+			projects.GET("/", handlers.ListProjects)
+			projects.POST("/", handlers.CreateProject)
+			projects.GET("/:id", handlers.GetProject)
+			projects.PUT("/:id", handlers.ReplaceProject)
+		}
+
+		apps := v1.Group("/applications")
+		{
+			repo := repository.NewApplicationRepository(db)
+			handlers := handler.ApplicationsHandler{ApplicationRepository: repo}
+
+			apps.POST("/", handlers.CreateApplication)
+			apps.GET("/", handlers.ListApplications)
+			apps.GET("/:id", handlers.GetApplication)
+			apps.DELETE("/:id", handlers.DeleteApplication)
+
+			pipelinesGroup := apps.Group("/:id/pipelines")
+			{
+				pipelineHandlers := handler.PipelinesHandler{ApplicationRepository: repo}
+				pipelinesGroup.POST("/github", pipelineHandlers.RunPipelineFromGithub)
+			}
+		}
+
+		registries := v1.Group("/registries")
+		{
+			handlers := handler.RegistriesHandler{RegistryRepository: repository.NewRegistryRepository(db)}
+			registries.POST("/", handlers.CreateRegistry)
+			registries.GET("/", handlers.ListRegistries)
+			registries.GET("/:id", handlers.GetRegistry)
+		}
+
+		infras := v1.Group("/infrastructures")
+		{
+			handlers := handler.InfrastructuresHandler{InfraRepository: repository.NewInfraRepository(db)}
+			infras.POST("/", handlers.Create)
+			infras.GET("/", handlers.List)
+			infras.GET("/:id", handlers.Get)
+		}
 	}
 }
 
@@ -87,12 +122,12 @@ func (as *ApiServer) Run() error {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with
+	// Wait for interrupt signal to gracefully shut down the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
+	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info().Msg("Shutting down server...")
